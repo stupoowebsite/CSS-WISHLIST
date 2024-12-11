@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Wishlist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #b71c1c;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        main {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .column {
+            background: white;
+            border: 2px solid #b71c1c;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 15px;
+            width: 250px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .column h2 {
+            text-align: center;
+            color: #b71c1c;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .wishlist-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .wishlist-btn {
+            background-color: #b71c1c;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .wishlist-btn:hover {
+            background-color: #8b0000;
+        }
+        .wishlist {
+            list-style: none;
+            padding: 0;
+            margin-top: 10px;
+        }
+        .wishlist li {
+            background: #ffe4e1;
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+    </style>
+    <!-- Firebase -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_xd1fZKYfyELZeH5dXlRyH8mBuChNZtM",
+            authDomain: "css-wishlist-ba90b.firebaseapp.com",
+            projectId: "css-wishlist-ba90b",
+            storageBucket: "css-wishlist-ba90b.appspot.com",
+            messagingSenderId: "679964742130",
+            appId: "1:679964742130:web:8a7f33b6e4003486599b6b",
+            measurementId: "G-JD3E80JS2L"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const names = [
+            "VILLO", "BELIGOLO", "MALDAN", "DAILO", "VILLANUEVA", "SANICO", "CATACUTAN", "ABABON", "LERIO", "DINGLASAN", "PATRON", "AMOR", "LUNA", "AGUSTIN", "RAPADA", "RANO", "TAPASAO", "ROXAS", "IJAN", "CUEVAS", "JUMAWAN", "DELOS REYES", "CREDO", "ALIT", "RODRIGUEZ", "BANTAYAO", "GENEROSO", "CLAROS", "GABIANA", "CALIBAT", "GARSULA", "LOPEZ", "LOTRAGO", "JAVIER", "TORRES", "AMARO", "DECIAR", "JAPON", "LABSAN", "FLORES", "CALBOG", "SUPERIO", "DAGONTON", "ALCORCON", "ABINES", "GAUDAN", "PERATER", "EUMAGUE", "BOCO", "BOLO", "BUENAVISTA", "GONZAGA", "FUENTES", "FUKUTOMI", "CORDOVA", "CABREROS", "PATAYTAY", "SERION", "TROPEZADO"
+        ];
+
+        const container = document.getElementById('wishlist-columns');
+
+        const createColumn = (name) => {
+            const column = document.createElement('div');
+            column.className = 'column';
+
+            column.innerHTML = `
+                <h2>${name}</h2>
+                <input type="text" class="wishlist-input" placeholder="Enter your wish">
+                <button class="wishlist-btn">Add Wish</button>
+                <ul class="wishlist"></ul>
+            `;
+
+            const input = column.querySelector('.wishlist-input');
+            const button = column.querySelector('.wishlist-btn');
+            const wishlist = column.querySelector('.wishlist');
+
+            // Load initial data from Firestore
+            const docRef = doc(db, "wishlists", name);
+            onSnapshot(docRef, (docSnap) => {
+                wishlist.innerHTML = "";
+                if (docSnap.exists()) {
+                    const wishes = docSnap.data().wishes || [];
+                    wishes.forEach(wish => {
+                        const li = document.createElement('li');
+                        li.textContent = wish;
+                        wishlist.appendChild(li);
+                    });
+                }
+            });
+
+            // Add a new wish
+            button.addEventListener('click', async () => {
+                if (input.value.trim() !== "") {
+                    const newWish = input.value;
+                    const docSnap = await getDoc(docRef);
+                    const existingWishes = docSnap.exists() ? docSnap.data().wishes || [] : [];
+
+                    const updatedWishes = [...existingWishes, newWish];
+                    await setDoc(docRef, { wishes: updatedWishes });
+
+                    input.value = "";
+                }
+            });
+
+            container.appendChild(column);
+        };
+
+        names.forEach(createColumn);
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Christmas Wishlist</h1>
+        <p>Write your wishes for Christmas!</p>
+    </header>
+    <main id="wishlist-columns">
+        <!-- Columns will be added here dynamically -->
+    </main>
+</body>
+</html>
